@@ -62,9 +62,9 @@ const Footer = () => {
         <Typography variant="body2" color="inherit" align="center" sx={{ mb: 1 }}>
           Email: boradhinesha244@gmail.com
         </Typography>
-        <Typography variant="body2" color="inherit" align="center" sx={{ mb: 1 }}>
+        {/* <Typography variant="body2" color="inherit" align="center" sx={{ mb: 1 }}>
           Phone: 7600286656
-        </Typography>
+        </Typography> */}
         <Typography variant="body2" color="inherit" align="center" sx={{ mb: 1 }}>
           Location: Ahmedabad, Gujarat
         </Typography>
