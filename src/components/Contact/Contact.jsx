@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
   Typography,
   TextField,
   Button,
-  Grid,
   Paper,
-  useTheme
+  useTheme,
+  Snackbar,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import SendIcon from '@mui/icons-material/Send';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +21,23 @@ const Contact = () => {
     email: '',
     message: '',
   });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const theme = useTheme();
+
+  // EmailJS configuration
+  const EMAILJS_CONFIG = {
+    serviceId: 'service_r9da72p', // Replace with your new service ID
+    templateId: 'template_4kwnd4s', // Replace with your new template ID
+    publicKey: 'b_3i3PduwUXlQIEG5', // Replace with your new public key
+  };
+
+  // Initialize EmailJS when component mounts
+  useEffect(() => {
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -27,10 +46,64 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      message: '',
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your form submission logic here
-    console.log(formData);
+    setIsSubmitting(true);
+    
+    try {
+      // Log the data being sent
+      console.log('Sending form data:', {
+        from_name: formData.name,
+        from_email: formData.email,
+        message: formData.message,
+      });
+
+      const result = await emailjs.send(
+        EMAILJS_CONFIG.serviceId,
+        EMAILJS_CONFIG.templateId,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          message: formData.message,
+        }
+      );
+
+      console.log('EmailJS Response:', result);
+
+      if (result.status === 200 || result.text === 'OK') {
+        setSnackbarMessage('Message sent successfully!');
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+        resetForm();
+      } else {
+        throw new Error(`EmailJS returned status: ${result.status}`);
+      }
+    } catch (error) {
+      console.error('Detailed EmailJS Error:', error);
+      console.error('Error details:', {
+        serviceId: EMAILJS_CONFIG.serviceId,
+        templateId: EMAILJS_CONFIG.templateId,
+        publicKey: EMAILJS_CONFIG.publicKey,
+        formData
+      });
+      setSnackbarMessage('Failed to send message. Please try again later.');
+      setSnackbarSeverity('error');
+      setOpenSnackbar(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -91,12 +164,24 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isSubmitting}
                   sx={{
                     '& .MuiInputLabel-root': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&.Mui-focused': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiInputBase-input': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&:hover': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
+                      '&:focus': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
@@ -104,6 +189,9 @@ const Contact = () => {
                       },
                       '&:hover fieldset': {
                         borderColor: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
                       },
                     },
                   }}
@@ -117,12 +205,24 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isSubmitting}
                   sx={{
                     '& .MuiInputLabel-root': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&.Mui-focused': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiInputBase-input': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&:hover': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
+                      '&:focus': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
@@ -130,6 +230,9 @@ const Contact = () => {
                       },
                       '&:hover fieldset': {
                         borderColor: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
                       },
                     },
                   }}
@@ -144,12 +247,24 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isSubmitting}
                   sx={{
                     '& .MuiInputLabel-root': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&.Mui-focused': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiInputBase-input': {
                       fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      '&:hover': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
+                      '&:focus': {
+                        color: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
+                      },
                     },
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
@@ -157,6 +272,9 @@ const Contact = () => {
                       },
                       '&:hover fieldset': {
                         borderColor: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: theme.palette.mode === 'light' ? '#000000' : '#ffffff',
                       },
                     },
                   }}
@@ -169,7 +287,8 @@ const Contact = () => {
                     type="submit"
                     variant="outlined"
                     size="large"
-                    endIcon={<SendIcon />}
+                    endIcon={isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
+                    disabled={isSubmitting}
                     sx={{
                       borderColor: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
                       color: theme.palette.mode === 'light' ? '#1a1a1a' : '#ffffff',
@@ -182,7 +301,7 @@ const Contact = () => {
                       py: 1.5,
                     }}
                   >
-                    Send Message
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </motion.div>
               </Box>
@@ -190,6 +309,20 @@ const Contact = () => {
           </Paper>
         </motion.div>
       </Container>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
